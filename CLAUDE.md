@@ -20,3 +20,9 @@
   Inject narrow capabilities; do not add new gateway or cache singleton imports to flows.
 - Run `npx tsx src/test/commandArchitectureGuard.test.ts`, `npm test`, and the relevant
   focused tests before committing an architecture change.
+
+## Fork
+
+- This checkout is a fork of giladger/Beanie (`upstream`, read-only). Read `FORK.md`
+  before merging upstream or making a fork-only change, keep fork changes small and
+  isolated, and record every fork-only change in its list.
