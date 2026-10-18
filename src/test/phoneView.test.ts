@@ -83,8 +83,10 @@ run('phone shots render selected shot as an accordion below the row', () => {
 run('phone shot rows show computed age for unstamped shots', () => {
   const html = renderPhoneShell({ ...model(), activeTab: 'shots' });
 
-  includes(html, '4d · Profile shot-1 · Jun 5');
-  includes(html, '4d · Profile shot-1 · 1:2.2 · Jun 5');
+  // The view formats with the runtime locale ([]); build the expectation the same way.
+  const shotDay = new Date('2026-06-05T10:00:00.000Z').toLocaleString([], { month: 'short', day: 'numeric' });
+  includes(html, `4d · Profile shot-1 · ${shotDay}`);
+  includes(html, `4d · Profile shot-1 · 1:2.2 · ${shotDay}`);
 });
 
 run('phone home places machine power above the coffee card', () => {

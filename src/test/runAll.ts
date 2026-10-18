@@ -1,6 +1,6 @@
 import { readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const testDir = dirname(fileURLToPath(import.meta.url));
 const testFiles = readdirSync(testDir)
@@ -8,5 +8,6 @@ const testFiles = readdirSync(testDir)
   .sort();
 
 for (const file of testFiles) {
-  await import(join(testDir, file));
+  // A file URL, not a path: Node's ESM loader rejects bare `C:\...` paths on Windows.
+  await import(pathToFileURL(join(testDir, file)).href);
 }

@@ -89,7 +89,9 @@ run('history view computes age for shots without stored freshness metadata', () 
     batchesByBean: { [batch.beanId]: [batch] }
   });
 
-  includes(html, '4d · Profile shot-a · Jun 5');
+  // The view formats with the runtime locale ([]); build the expectation the same way.
+  const shotDay = new Date('2026-06-05T10:00:00.000Z').toLocaleString([], { month: 'short', day: 'numeric' });
+  includes(html, `4d · Profile shot-a · ${shotDay}`);
 });
 
 run('history view marks the comparison shot and renders the compare chip', () => {

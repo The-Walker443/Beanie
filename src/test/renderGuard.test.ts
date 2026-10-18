@@ -43,7 +43,8 @@ function sourceFiles(dir: string): string[] {
 
 const offenders: string[] = [];
 for (const file of sourceFiles(srcDir)) {
-  const rel = relative(srcDir, file);
+  // Normalise Windows separators so the prefix check and offender list stay POSIX-style.
+  const rel = relative(srcDir, file).split('\\').join('/');
   if (rel.startsWith(ALLOWED_PREFIX)) continue;
   const lines = readFileSync(file, 'utf8').split('\n');
   lines.forEach((line, index) => {

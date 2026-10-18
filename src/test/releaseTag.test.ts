@@ -208,6 +208,11 @@ function isMutatingGitCommand(entry: CommandLog): boolean {
 }
 
 function run(name: string, test: () => void): void {
+  // The git/npm mocks are extensionless shebang scripts found via PATH, which Windows can't run.
+  if (process.platform === 'win32') {
+    console.log(`ok - ${name} # SKIP needs POSIX command mocks`);
+    return;
+  }
   try {
     test();
     console.log(`ok - ${name}`);
