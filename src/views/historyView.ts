@@ -16,7 +16,7 @@ import { renderStageRail, type LiveStagesView } from './workbenchView';
 import { icon } from '../components/icons';
 import { enjoymentBadge, shotScoreControl } from '../components/shotScore';
 import { escapeAttr, escapeHtml } from '../components/html';
-import { forkShotListRowText } from './forkShotListRow';
+import { forkShotListRowText, shotRowDayKey } from './forkShotListRow';
 
 export interface HistoryViewModel {
   shots: ShotRecord[];
@@ -114,6 +114,7 @@ interface ShotListItemCacheEntry {
   comparing: boolean;
   hint: string;
   batchesByBean: Record<string, BeanBatch[]>;
+  forkDay: string;
 }
 
 const shotListItemCache = new WeakMap<ShotRecord, ShotListItemCacheEntry>();
@@ -126,13 +127,15 @@ function renderShotListItem(
   batchesByBean: Record<string, BeanBatch[]>
 ): string {
   const hint = renderSecondTapHint('shot', shot.id, secondTapHint);
+  const forkDay = shotRowDayKey();
   const cached = shotListItemCache.get(shot);
   if (
     cached &&
     cached.active === active &&
     cached.comparing === comparing &&
     cached.hint === hint &&
-    cached.batchesByBean === batchesByBean
+    cached.batchesByBean === batchesByBean &&
+    cached.forkDay === forkDay
   ) {
     return cached.html;
   }
@@ -154,7 +157,7 @@ function renderShotListItem(
       ${hint}
     </button>
   `;
-  shotListItemCache.set(shot, { html, active, comparing, hint, batchesByBean });
+  shotListItemCache.set(shot, { html, active, comparing, hint, batchesByBean, forkDay });
   return html;
 }
 

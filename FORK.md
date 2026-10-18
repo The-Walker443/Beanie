@@ -67,6 +67,39 @@ Fork-Zeile.
 Zeilen-Bausteine (Dauer, Datum, Freshness), übergibt der Aufruf weiterhin die
 Original-Bausteine an `forkShotListRowText`, und das Soll-Verhalten oben gilt.
 
+### A2 – „Heute“ und „Gestern“ statt Datum in den Verlaufszeilen
+
+**Wunsch (2026-10-18):** Das Datum von heute und gestern soll durch die Wörter
+„Heute“ und „Gestern“ ersetzt werden.
+
+**Soll-Verhalten** (ergänzt A1, Zeile darunter):
+
+| Shot von      | Anzeige                     |
+| ------------- | --------------------------- |
+| heute         | `Heute 13:08 · D-Flow`      |
+| gestern       | `Gestern 07:23 · D-Flow`    |
+| älter         | `16. Okt. 13:50 · D-Flow`   |
+
+- „Heute“ und „Gestern“ richten sich nach dem Kalendertag in der Ortszeit des
+  Geräts, nicht nach 24 Stunden. Ein Shot von 23:55 heißt nach Mitternacht
+  „Gestern“. Auch an Tagen mit Zeitumstellung stimmt das.
+- Die Wörter kommen aus der Sprache des Geräts (`Intl.RelativeTimeFormat`) und
+  werden großgeschrieben: auf Deutsch „Heute“ und „Gestern“, auf Englisch
+  „Today“ und „Yesterday“.
+- Die Uhrzeit bleibt immer dabei.
+- Nach Mitternacht werden die Zeilen beim nächsten Neuzeichnen des Verlaufs
+  korrigiert. Ein „Heute“ von gestern bleibt also nicht stehen.
+
+**Umsetzung:** Steckt in `src/views/forkShotListRow.ts` (`relativeDayLabel`,
+`shotRowDayKey`). In `src/views/historyView.ts` gibt es zusätzlich das Feld
+`forkDay` im Zeilen-Cache (`ShotListItemCacheEntry`). Es sorgt dafür, dass
+gespeicherte Zeilen beim Tageswechsel neu berechnet werden. Tests liegen in
+`src/test/forkShotListRow.test.ts`.
+
+**Beim Merge beachten:** Baut das Original den Zeilen-Cache in
+`renderShotListItem` um, muss der Tages-Schlüssel wieder in die Cache-Prüfung.
+Sonst bleibt nach Mitternacht „Heute“ stehen.
+
 ## Fixes, die im Original noch fehlen
 
 ### F1 – Bewertungen auf Decaids 0–10-Skala ([giladger/Beanie#4](https://github.com/giladger/Beanie/issues/4))
