@@ -48,6 +48,7 @@ durchgehen und jede Anpassung kurz prüfen.
 | - | ---------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------- |
 | 1 | Unit-Tests laufen unter Windows (Import-Pfad, Pfadtrenner, Datumsformat, Release-Test übersprungen) | `src/test/runAll.ts`, `renderGuard`, `historyView`, `phoneView`, `releaseTag` (`*.test.ts`) | ja, als PR anbieten     |
 | 2 | Diese Datei und ein Fork-Hinweis in `CLAUDE.md`                  | `FORK.md`, `CLAUDE.md`                                                  | nein                    |
+| 3 | Bewertungen auf Decaids 0–10-Skala ([giladger/Beanie#4](https://github.com/giladger/Beanie/issues/4)): Knöpfe schreiben 2/4/6/8/10, Werte über 10 von alten Gateways oder aus dem Cache werden wie bei der Decaid-Migration umgerechnet | `src/domain/shotEnjoyment.ts`, `src/components/shotScore.ts`, `src/domain/dialIn.ts`, `src/domain/shotEditModel.ts`, `src/mock/demo.ts` und Tests | ja, als PR zu #4 anbieten. Entfällt, sobald das Original das Issue selbst behebt; beim Merge dann die Original-Lösung übernehmen |
 
 ## Lokale Einrichtung (Windows)
 
