@@ -391,7 +391,8 @@ function renderMaintenanceSection(options: SettingsRenderOptions): string {
   const stateBtn = (state: string, label: string): string =>
     `<button type="button" class="text-button" data-action="settings-machine-state" data-value="${state}" ${writable ? '' : 'disabled'}>${escapeHtml(label)}</button>`;
   return renderSection('Maintenance', [
-    settingControlRow('Descale', 'Run the descaling cycle on the machine', stateBtn('descaling', 'Start descale')),
+    // Fork A3: descaling runs through the guided routine (cool-down, solution, rinse).
+    settingControlRow('Descale', 'Guided descale: cool down, descale, rinse', `<button type="button" class="text-button" data-action="open-descale-wizard" ${writable ? '' : 'disabled'}>Start descale</button>`),
     settingControlRow('Sleep', 'Put the machine to sleep', stateBtn('sleeping', 'Sleep'))
   ].join(''));
 }

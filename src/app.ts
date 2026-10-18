@@ -369,6 +369,10 @@ import {
   renderMachineProgressPage as renderMachineProgressPageView
 } from './views/machineView';
 import { renderCleaningWizardModal as renderCleaningWizardModalView } from './views/cleaningWizardView';
+// Fork A3 (FORK.md): descaling reminder and guided descale.
+import { ForkDescaleFeature } from './controllers/forkDescaleFlow';
+import { renderDescaleBar, renderDescaleDateDialog } from './views/forkDescaleBar';
+import { renderDescaleWizardModal } from './views/forkDescaleWizardView';
 import {
   renderGrinderEditorPage as renderGrinderEditorPageView,
   renderMachineLabelModal as renderMachineLabelModalView,
@@ -796,6 +800,30 @@ export class BeanieApp {
     },
     this.machineWorkflowCommands
   );
+  // Fork A3: machine effects go through the owned paths below — the settings
+  // flow for the descale state, setMachineWorkflow for steam, machineAction for
+  // flush and steam.
+  private readonly forkDescale = new ForkDescaleFeature({
+    now: () => new Date(),
+    demo: () => this.state.demo,
+    canWriteSettings: () =>
+      this.state.demo || (this.hasConnectedGatewayAuthority() && this.state.settingsStoreAvailable),
+    modal: () => this.state.modal,
+    openModal: (modal) => this.setState({ modal }),
+    closeModal: () => this.setState({ modal: null }),
+    showStatus: (status) => this.setState({ status }),
+    requestRender: () => this.render(),
+    machineState: () => this.state.machine?.state?.state ?? null,
+    steamTemperature: () => this.state.machine?.steamTemperature ?? null,
+    hasGhc: () => this.machineHasGhc(),
+    busy: () => this.state.busy,
+    steamSettings: () => this.currentSteamSettings(),
+    applySteamSettings: (steam, status) =>
+      this.setMachineWorkflow(steam, this.currentHotWaterData(), this.currentRinseData(), status),
+    startDescale: () => this.machineSettings.requestMachineState('descaling'),
+    startService: (state) => this.machineAction(state),
+    dateInputValue: () => this.root.querySelector<HTMLInputElement>('[data-field="descale-date"]')?.value ?? null
+  });
   private readonly recipeApply = new RecipeApplyController({
     commands: this.machineWorkflowCommands,
     runtime: () => ({
@@ -2212,6 +2240,7 @@ export class BeanieApp {
         this.scannerFlow.cancelScannerWork();
         this.recipeApply.cancel(new Error('Demo authority replaced by gateway data'));
         this.flowCalibrator.reset();
+        this.forkDescale.reset();
         this.beanInventoryBrowser.reset();
         this.resetDemoRuntimeForGateway();
       }
@@ -3748,6 +3777,7 @@ export class BeanieApp {
       this.trackMachineServiceState(machine.state.state, machine.state.substate, tMs);
       this.screensaverIsland.observeSleepState(machine.state.state === 'sleeping');
       this.beginNoScaleBrewFlashIfNeeded(machine, frameState.previousMachineState, tMs);
+      this.forkDescale.onMachineFrame(machine.state.state, machine.steamTemperature, tMs);
     }
     if (scale) {
       this.state.scale = scale;
@@ -4473,7 +4503,8 @@ export class BeanieApp {
       this.settingsClickActions(),
       this.navigationClickActions(),
       this.profileEditorFlow.profileEditorClickActions(),
-      this.derekFlow.derekClickActions()
+      this.derekFlow.derekClickActions(),
+      this.forkDescale.clickActions()
     ];
     for (const group of groups) {
       for (const [action, handler] of Object.entries(group)) {
@@ -4637,6 +4668,7 @@ export class BeanieApp {
 
   /** Re-derive settings-backed state from the in-memory cache and render. */
   private applyLoadedSettings(storeAvailable = this.state.settingsStoreAvailable): void {
+    this.forkDescale.reloadSettings();
     this.setState({
       settingsLoaded: true,
       settingsStoreAvailable: storeAvailable,
@@ -6542,6 +6574,7 @@ export class BeanieApp {
     const draft = this.state.draft;
     const brewTemp = this.brewTempValue();
     const cleaningDueNow = cleaningDue(this.state.cleaning, this.state.cleaningThreshold);
+    const descaleDueNow = this.forkDescale.due();
     return renderWorkbenchView({
       topbar: {
         stats: topbarStats,
@@ -6553,7 +6586,10 @@ export class BeanieApp {
         clock: this.state.settingsPreferences.topbarClock
           ? clockLabel(new Date(), this.state.settingsPreferences.clockFormat)
           : null,
-        cleaningDue: cleaningDueNow,
+        cleaningDue: cleaningDueNow || descaleDueNow,
+        maintenanceDueLabel: cleaningDueNow && descaleDueNow
+          ? 'cleaning and descaling due'
+          : descaleDueNow ? 'descaling due' : 'cleaning due',
         asleep: this.state.asleep
       },
       hero: this.heroViewModel(bean),
@@ -6916,6 +6952,8 @@ export class BeanieApp {
     if (this.state.modal === 'delete-shot') return this.renderDeleteShotModal();
     if (this.state.modal === 'shot-stages') return this.renderShotStagesModal();
     if (this.state.modal === 'cleaning-wizard') return this.renderCleaningWizardModal();
+    if (this.state.modal === 'descale-wizard') return renderDescaleWizardModal(this.forkDescale.wizardViewModel());
+    if (this.state.modal === 'descale-date') return renderDescaleDateDialog(this.forkDescale.dateDialogViewModel());
     if (this.state.modal === 'import-profile') return this.renderImportProfileModal();
     if (this.state.modal === 'new-profile-kind') return renderNewProfileKindModalView();
     if (this.state.modal === 'restore-original') return this.renderRestoreOriginalModal();
@@ -7149,7 +7187,8 @@ export class BeanieApp {
             ]
           }
       ],
-      cleaningBarHtml: this.renderCleaningBar()
+      cleaningBarHtml: this.renderCleaningBar(),
+      descaleBarHtml: renderDescaleBar(this.forkDescale.barViewModel())
     });
   }
 

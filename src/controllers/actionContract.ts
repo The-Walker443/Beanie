@@ -28,6 +28,8 @@ export type AppModal =
   | 'delete-shot'
   | 'shot-stages'
   | 'cleaning-wizard'
+  | 'descale-wizard'
+  | 'descale-date'
   | 'import-profile'
   | 'new-profile-kind'
   | 'restore-original'

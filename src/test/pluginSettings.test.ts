@@ -559,7 +559,8 @@ run('gateway-only settings actions render disabled while live authority is absen
     settingsModel(), 'machine', bundle, null, accountPanel(), ['machine'],
     { gatewayActionsWritable: false, machineActionsWritable: false }
   );
-  equal(machineHtml.includes('data-action="settings-machine-state" data-value="descaling" disabled'), true);
+  // Fork A3: Descale opens the guided routine.
+  equal(machineHtml.includes('data-action="open-descale-wizard" disabled'), true);
 
   const dangerHtml = renderSettingsShell(
     settingsModel(), 'danger', bundle, null, accountPanel(), ['danger'],

@@ -16,6 +16,8 @@ export interface WorkbenchTopbarViewModel {
    * The app patches #top-clock in place each minute. */
   clock: string | null;
   cleaningDue: boolean;
+  /** Fork A3: why the Water badge shows, e.g. "descaling due"; defaults to "cleaning due". */
+  maintenanceDueLabel?: string;
   asleep: boolean;
 }
 
@@ -172,7 +174,7 @@ export function renderTopbar(model: WorkbenchTopbarViewModel): string {
   const powerAction = model.asleep ? 'wake' : 'sleep';
   const powerLabel = model.asleep ? 'Wake' : 'Sleep';
   const machineSettingsLabel = model.cleaningDue
-    ? 'Water - steam, water, flush (cleaning due)'
+    ? `Water - steam, water, flush (${model.maintenanceDueLabel ?? 'cleaning due'})`
     : 'Water - steam, water, flush';
   const stats = model.stats;
   return `

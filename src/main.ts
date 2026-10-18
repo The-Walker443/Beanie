@@ -1,6 +1,7 @@
 import { BeanieApp } from './app';
 import { renderBootstrapFailure } from './render/bootstrapFailure';
 import './styles.css';
+import './fork.css';
 
 declare global {
   interface Window {

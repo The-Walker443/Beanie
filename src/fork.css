@@ -1,0 +1,100 @@
+/* Fork customizations (FORK.md). main.ts loads this after styles.css, so the
+   rules here only add to or narrowly override upstream's styles. */
+
+/* ---- A3: descaling bar and guided descale -------------------------------- */
+
+/* The descaling bar is a second row under the backflush bar. The lanes give up
+   the room: their icon tile shrinks from 118px towards 40px when the page is
+   short (1280x800 tablets) and keeps its full height where there is space. */
+.machine-page {
+  grid-template-rows: minmax(0, 1fr) auto auto;
+}
+
+.machine-lanes .machine-lane {
+  grid-template-rows: auto minmax(40px, 118px) auto auto;
+}
+
+.descale-bar.soon small {
+  color: var(--amber);
+}
+
+.descale-date-button svg {
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+}
+
+.descale-wizard-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.descale-wizard-fact {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+}
+
+.descale-wizard-fact svg {
+  width: 18px;
+  height: 18px;
+  color: var(--muted);
+}
+
+.descale-wizard-fact span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.descale-wizard-fact strong {
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.descale-wizard-fact.met {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+}
+
+.descale-wizard-fact.met svg {
+  color: var(--accent);
+}
+
+.descale-date-modal {
+  width: min(440px, 100%);
+  gap: 16px;
+  padding: 20px 20px 22px;
+}
+
+.descale-date-field {
+  display: grid;
+  gap: 6px;
+}
+
+.descale-date-field span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.descale-date-field input {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--panel-2);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 800;
+  color-scheme: dark light;
+}

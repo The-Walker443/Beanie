@@ -10,6 +10,8 @@
 // This module owns the canonical key constants so the domain modules import
 // them from here (one direction only — no import back, which would cycle).
 
+import { FORK_SYNCED_SETTING_KEYS } from './forkSettingsKeys';
+
 export const SETTINGS_STORE_NAMESPACE = 'beanie';
 
 // --- synced setting keys ------------------------------------------------------
@@ -69,7 +71,8 @@ export const SYNCED_SETTING_KEYS: readonly string[] = [
   cleaningOverrideKey,
   cleaningThresholdKey,
   secondTapHintKey,
-  ...inputDialogRecentKeys
+  ...inputDialogRecentKeys,
+  ...FORK_SYNCED_SETTING_KEYS
 ];
 
 const syncedKeySet = new Set(SYNCED_SETTING_KEYS);

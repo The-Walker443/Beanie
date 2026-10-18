@@ -31,6 +31,8 @@ export interface MachinePageViewModel {
   headerHtml: string;
   lanes: MachineLaneOptions[];
   cleaningBarHtml: string;
+  /** Fork A3: the descaling bar under the cleaning bar. */
+  descaleBarHtml?: string;
 }
 
 export interface MachinePresetOption {
@@ -73,6 +75,7 @@ export function renderMachinePage(model: MachinePageViewModel): string {
         ${model.lanes.map((lane) => renderMachineLane(lane)).join('')}
       </div>
       ${model.cleaningBarHtml}
+      ${model.descaleBarHtml ?? ''}
     </main>
   `;
 }
