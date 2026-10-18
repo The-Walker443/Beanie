@@ -1,5 +1,6 @@
 import type { BeanBatch, ShotRecord } from '../api/types';
 import { liveGhostReference, renderHistoryView, selectedHistoryShot } from '../views/historyView';
+import { shotDateTimeLabel } from '../views/forkShotListRow';
 
 run('history view hides service shots while keeping pagination based on raw shots', () => {
   const html = renderHistoryView({
@@ -71,7 +72,9 @@ run('history view renders second tap hint for the matching shot only', () => {
   includes(html, 'has-second-tap-hint');
 });
 
-run('history view computes age for shots without stored freshness metadata', () => {
+// Fork A1 (FORK.md): rows show duration · grind over date and time · profile, so
+// the roast age upstream asserts here is intentionally not in the row.
+run('history view rows show duration · grind over date and time · profile', () => {
   const batch: BeanBatch = {
     id: 'batch-1',
     beanId: 'bean-1',
@@ -89,9 +92,9 @@ run('history view computes age for shots without stored freshness metadata', () 
     batchesByBean: { [batch.beanId]: [batch] }
   });
 
-  // The view formats with the runtime locale ([]); build the expectation the same way.
-  const shotDay = new Date('2026-06-05T10:00:00.000Z').toLocaleString([], { month: 'short', day: 'numeric' });
-  includes(html, `4d · Profile shot-a · ${shotDay}`);
+  includes(html, '<span class="shot-item-recipe">28s · 12.0</span>');
+  includes(html, `<span class="shot-item-profile">${shotDateTimeLabel('2026-06-05T10:00:00.000Z')} · Profile shot-a</span>`);
+  excludes(html, '4d · ');
 });
 
 run('history view marks the comparison shot and renders the compare chip', () => {

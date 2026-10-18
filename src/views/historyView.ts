@@ -16,6 +16,7 @@ import { renderStageRail, type LiveStagesView } from './workbenchView';
 import { icon } from '../components/icons';
 import { enjoymentBadge, shotScoreControl } from '../components/shotScore';
 import { escapeAttr, escapeHtml } from '../components/html';
+import { forkShotListRowText } from './forkShotListRow';
 
 export interface HistoryViewModel {
   shots: ShotRecord[];
@@ -140,15 +141,16 @@ function renderShotListItem(
   const recipeText = shotRecipeDisplay(shot, recipe);
   const date = shotDateShortLabel(shot.timestamp);
   const freshness = shotFreshnessBadgeForShot(shot, batchForShotFreshness(shot, batchesByBean));
+  const row = forkShotListRowText(shot, recipe, { recipeText, duration, freshness, date });
   const html = `
     <button id="shot-${escapeAttr(shot.id)}" class="shot-item ${active ? 'active' : ''} ${comparing ? 'comparing' : ''} ${isDerekedShot(shot) ? 'dereked' : ''} ${hint ? 'has-second-tap-hint' : ''}" data-action="select-history-shot" data-id="${escapeAttr(shot.id)}">
       <span class="shot-item-info">
-        <span class="shot-item-recipe">${escapeHtml(recipeText)}${duration ? ` @ ${escapeHtml(duration)}` : ''}</span>
+        <span class="shot-item-recipe">${escapeHtml(row.title)}</span>
         ${isDerekedShot(shot) ? `<span class="derek-shot-mark" title="Has Derek dial-in notes">${icon('sparkles')}</span>` : ''}
         ${comparing ? '<span class="compare-badge">overlay</span>' : ''}
         ${enjoymentBadge(shot)}
       </span>
-      <span class="shot-item-profile">${escapeHtml([freshness, recipe.profileTitle ?? 'No profile', date].filter(Boolean).join(' · '))}</span>
+      <span class="shot-item-profile">${escapeHtml(row.subtitle)}</span>
       ${hint}
     </button>
   `;
