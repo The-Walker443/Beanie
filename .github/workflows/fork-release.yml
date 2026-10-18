@@ -1,0 +1,129 @@
+name: Release fork skin
+
+# Fork releases (FORK.md): push a tag like 0.3.9-fork.1. Decaid installs the
+# skin from this repository's latest release and updates it from new ones.
+# Upstream's release.yml only reacts to v* tags, so the two never overlap.
+
+on:
+  push:
+    tags:
+      - '*-fork.*'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate fork release
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Stamp the tag's version
+        run: node scripts/fork-release-version.mjs "$GITHUB_REF_NAME"
+
+      - name: Run tests
+        run: npm test
+
+      - name: Install browser runtime
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser smoke tests
+        run: npm run test:browser
+
+      - name: Verify release commit belongs to main
+        run: |
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "Release tag must point to a commit on main"
+            exit 1
+          fi
+
+      - name: Build and validate release zip
+        run: npm run release:zip
+
+      - name: Extract release notes
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'EOF'
+          import { readFileSync, writeFileSync } from 'node:fs';
+
+          const tag = process.env.RELEASE_TAG;
+          const changelog = readFileSync('CHANGELOG-FORK.md', 'utf8');
+          const heading = new RegExp(`^##\\s+${escapeRegExp(tag)}(?:\\s+-\\s+.*)?\\s*$`, 'm');
+          const match = heading.exec(changelog);
+
+          if (!match) {
+            console.error(`No CHANGELOG-FORK.md section found for ${tag}.`);
+            process.exit(1);
+          }
+
+          const bodyStart = match.index + match[0].length;
+          const rest = changelog.slice(bodyStart);
+          const nextHeading = rest.search(/^##\s+/m);
+          const notes = (nextHeading === -1 ? rest : rest.slice(0, nextHeading)).trim();
+
+          if (!notes) {
+            console.error(`CHANGELOG-FORK.md section for ${tag} is empty.`);
+            process.exit(1);
+          }
+
+          writeFileSync('release-notes.md', `${notes}\n`);
+
+          function escapeRegExp(value) {
+            return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          }
+          EOF
+
+      - name: Upload validated release bundle
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: release-${{ github.ref_name }}
+          path: |
+            beanie-v${{ github.ref_name }}.zip
+            release-notes.md
+          if-no-files-found: error
+          retention-days: 7
+
+  publish:
+    name: Publish fork release
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download validated release bundle
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: release-${{ github.ref_name }}
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          ZIP="beanie-v$GITHUB_REF_NAME.zip"
+          gh release create "$GITHUB_REF_NAME" "$ZIP" \
+            --title "Beanie (Fork) $GITHUB_REF_NAME" \
+            --notes-file release-notes.md \
+            --verify-tag \
+            --latest

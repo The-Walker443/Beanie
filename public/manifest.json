@@ -1,6 +1,6 @@
 {
-  "id": "beanie",
-  "name": "Beanie",
+  "id": "beanie-fix",
+  "name": "Beanie (Fork)",
   "description": "Bean-first dial-in workflow for Decent.app.",
   "version": "0.3.9",
   "author": "Gilad",
