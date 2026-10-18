@@ -100,6 +100,19 @@ gespeicherte Zeilen beim Tageswechsel neu berechnet werden. Tests liegen in
 `renderShotListItem` um, muss der Tages-Schlüssel wieder in die Cache-Prüfung.
 Sonst bleibt nach Mitternacht „Heute“ stehen.
 
+### A3 – Entkalkungs-Erinnerung mit geführtem Ablauf (geplant)
+
+**Wunsch (2026-10-18):** Analog zur Backflush-Erinnerung soll Beanie an das
+Entkalken erinnern. Man stellt den Zyklus ein und sieht, wann zuletzt entkalkt
+wurde. Der geführte Ablauf soll gleich mit eingebaut werden.
+
+**Status:** Konzept in [`docs/fork-descale-plan.md`](docs/fork-descale-plan.md),
+noch nicht gebaut. Festgelegt sind:
+- Zyklus Off/3/6/12/24 Monate;
+- Erfassung automatisch und manuell;
+- Assistent nach Decents Anleitung;
+- eine zweite Leiste unter Backflush.
+
 ## Fixes, die im Original noch fehlen
 
 ### F1 – Bewertungen auf Decaids 0–10-Skala ([giladger/Beanie#4](https://github.com/giladger/Beanie/issues/4))
