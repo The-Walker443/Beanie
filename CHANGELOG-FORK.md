@@ -4,6 +4,13 @@
 Die Änderungen des Originals stehen in `CHANGELOG.md`. Jede Überschrift ist
 ein Release-Tag (siehe `FORK.md`, Abschnitt „Release“).
 
+## 0.3.9-fork.2 - 2026-10-18
+
+- Im Verlauf stehen bei Shots von heute und gestern die Wörter „Heute“ und
+  „Gestern“ statt des Datums, z. B. „Heute 13:08 · D-Flow“. Ältere Shots zeigen
+  weiter das Datum. Maßgeblich ist der Kalendertag; nach Mitternacht werden die
+  Zeilen beim nächsten Neuzeichnen korrigiert.
+
 ## 0.3.9-fork.1 - 2026-10-18
 
 Basiert auf Beanie v0.3.9 und ersetzt die bisherige Skin „Beanie (0-10 Fix)“.
