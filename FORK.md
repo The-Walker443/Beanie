@@ -100,18 +100,83 @@ gespeicherte Zeilen beim Tageswechsel neu berechnet werden. Tests liegen in
 `renderShotListItem` um, muss der Tages-Schlüssel wieder in die Cache-Prüfung.
 Sonst bleibt nach Mitternacht „Heute“ stehen.
 
-### A3 – Entkalkungs-Erinnerung mit geführtem Ablauf (geplant)
+### A3 – Entkalkungs-Erinnerung mit geführtem Ablauf
 
 **Wunsch (2026-10-18):** Analog zur Backflush-Erinnerung soll Beanie an das
 Entkalken erinnern. Man stellt den Zyklus ein und sieht, wann zuletzt entkalkt
-wurde. Der geführte Ablauf soll gleich mit eingebaut werden.
+wurde. Der geführte Ablauf soll gleich mit eingebaut werden. Die Texte sind
+englisch, der Standard sind 12 Monate.
 
-**Status:** Konzept in [`docs/fork-descale-plan.md`](docs/fork-descale-plan.md),
-noch nicht gebaut. Festgelegt sind:
-- Zyklus Off/3/6/12/24 Monate;
-- Erfassung automatisch und manuell;
-- Assistent nach Decents Anleitung;
-- eine zweite Leiste unter Backflush.
+**Soll-Verhalten:** Das vollständige Konzept steht in
+[`docs/fork-descale-plan.md`](docs/fork-descale-plan.md). Kurz:
+
+- **Leiste „Descaling“** unter der Backflush-Leiste (Steam · Water · Flush).
+  - Statuszeile, z. B. `last descaled 18. März 2026 · overdue by 30 days`;
+  - Feld „Last“ mit Datumsdialog („Today“ oder Datum wählen, nicht in der
+    Zukunft);
+  - Feld „Remind · months“ mit Off/3/6/12/24;
+  - Knopf „Run descale“, der „Resume descale“ heißt, solange ein Ablauf
+    pausiert ist.
+- **Fälligkeit:** Gezählt werden Kalendermonate ab dem letzten Datum. 14 Tage
+  vorher wird die Leiste gelb, ab dem Fälligkeitstag eingefärbt, und der
+  „Water“-Knopf zeigt das Badge mit dem Tooltip „descaling due“ (oder „cleaning
+  and descaling due“). Ohne erfasstes Datum gibt es keine Mahnung.
+- **Erfassung:**
+  - Automatisch, wenn die Maschine `descaling` nach mindestens 3 Minuten
+    verlässt (nicht bei `error`, `booting` oder `fwUpgrade`).
+  - Manuell über den Datumsdialog.
+  - Beim Abschluss des Assistenten, aber nur, wenn ein Durchgang lief.
+  - Pro Tag gibt es einen Eintrag. Gespeichert werden die letzten 10 im
+    Gateway-KV `beanie.fork.descale.state`, das Intervall unter
+    `beanie.fork.descale.interval`.
+- **Assistent** in 6 Schritten plus „Done“, nach Decents Anleitung:
+  1. Heizung aus, Steam-Temperatur live bis ≤ 60 °C;
+  2. Lösung (80 g Zitronensäure auf 1.540 ml);
+  3. Entkalken, bis zu 3 Durchgänge. Start nur bei ausgeschalteter Heizung;
+     im Demo wird der Durchgang sofort gezählt;
+  4. Heizung wieder an, frisches Wasser;
+  5. Brühgruppe spülen, Leerlaufen des Tanks wird gezählt;
+  6. Steam spülen, Steam-Zeit vorübergehend 100 s, 5 Durchgänge ≥ 20 s werden
+     gezählt.
+
+  Für den Assistenten gilt:
+  - **Schließen (X):** pausiert. **Cancel:** beendet und stellt Steam-Zeit und
+    Heizung zurück.
+  - **Laufende Maschine:** Während `descaling` oder `steam` lässt er sich nicht
+    beenden.
+  - **Heizung schon vorher aus:** Dann schaltet er sie nicht ein.
+  - **Mit GHC:** Bei Maschinen mit GHC zeigt er Hinweise statt der Knöpfe für
+    Flush und Steam.
+- **Einstellungen → Wartung → Descale:** Der Knopf öffnet den Assistenten statt
+  direkt `descaling` anzufordern.
+
+**Umsetzung:** Fork-Module in `src/domain/forkDescale.ts`,
+`forkDescaleWizard.ts`, `forkSettingsKeys.ts`,
+`src/controllers/forkDescaleFlow.ts` (`ForkDescaleFeature` mit schmalem
+Host-Port), `src/views/forkDescaleBar.ts`, `forkDescaleWizardView.ts` und
+`src/fork.css`. Tests in `src/test/forkDescale*.test.ts`. Andockstellen im
+Original:
+
+| Datei | Änderung |
+| ----- | -------- |
+| `src/app.ts` | Imports, Konstruktion `forkDescale` (Host: `setMachineWorkflow` für Steam, `machineSettings.requestMachineState('descaling')`, `machineAction` für Flush und Steam), Klick-Gruppe, `onMachineFrame` in `ingestLiveFrame`, `reloadSettings` in `applyLoadedSettings`, `reset` beim Verlassen des Demos, zwei Modals in `renderModal`, `descaleBarHtml`, Badge und Tooltip in `renderWorkbench` |
+| `src/controllers/actionContract.ts` | `AppModal` um `'descale-wizard'` und `'descale-date'` ergänzt |
+| `src/domain/settingsStore.ts` | `...FORK_SYNCED_SETTING_KEYS` in der Key-Liste |
+| `src/views/machineView.ts` | optionales `descaleBarHtml` |
+| `src/views/workbenchView.ts` | optionales `maintenanceDueLabel` im Tooltip |
+| `src/components/SettingsShell.ts` | Descale-Knopf → `open-descale-wizard` |
+| `src/test/pluginSettings.test.ts` | Erwartung für den Descale-Knopf angepasst |
+| `src/main.ts` | `import './fork.css'` |
+| `src/fork.css` | überschreibt die Höhe der Symbol-Kachel (`minmax(40px, 118px)`) und hängt eine dritte Zeile an `.machine-page` |
+
+**Beim Merge beachten:** Ändert das Original den Steam-Schreibweg
+(`setMachineWorkflow`), die Modal-Liste, `renderMachinePage` oder das Layout
+der Maschinen-Seite, die Andockstellen oben prüfen und auf 1280×800 im Demo
+nachmessen. Die Spalten dürfen nicht abgeschnitten werden.
+
+**Noch offen:** Ob ein DE1 Pro den Entkalkungsmodus per API annimmt und welche
+Unterzustände er meldet, ist erst beim echten Entkalken prüfbar, zusammen mit
+dem Nutzer.
 
 ## Fixes, die im Original noch fehlen
 

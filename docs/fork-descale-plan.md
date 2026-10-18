@@ -1,6 +1,6 @@
 # Konzept: Entkalkungs-Erinnerung mit geführtem Ablauf (Fork-Wunsch A3)
 
-Stand: 2026-10-18 · Status: **Konzept, noch nicht gebaut**
+Stand: 2026-10-18 · Status: **gebaut in 0.3.9-fork.3** (Abweichungen und Details: FORK.md, A3)
 
 ## Wunsch
 
@@ -196,10 +196,14 @@ Maschine steuert. Architektur-Guard und Dependency-Test müssen grün bleiben.
   Bis dahin bleibt die automatische Erfassung defensiv: Sie zählt nur einen
   vollständigen Wechsel `descaling` → Ruhezustand.
 
-## Offene Punkte
+## Geklärt beim Bauen (2026-10-18)
 
-1. **Sprache:** Neue Texte auf Englisch wie der Rest der App, oder auf Deutsch?
-   Vorschlag: Englisch.
-2. **Standard-Intervall:** 12 Monate. Passt das zu deinem Wasser?
-3. **Letztes Entkalken:** Kennst du das Datum? Es lässt sich nach dem Einbau in
-   der Leiste nachtragen.
+1. **Sprache:** Die Texte sind englisch wie der Rest der App.
+2. **Standard-Intervall:** 12 Monate.
+3. **Letztes Entkalken:** Wird in der Leiste nachgetragen (Feld „Last“).
+4. **Abweichungen vom Konzept:**
+   - Die reine Zustandsmaschine des Assistenten liegt in
+     `src/domain/forkDescaleWizard.ts`, nicht in `controllers/`. Views dürfen
+     nichts aus `controllers/` importieren.
+   - Den Abschluss des Assistenten erfasst Beanie nur, wenn ein Durchgang lief.
+   - Schließen (X) pausiert, Cancel stellt zurück.

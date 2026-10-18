@@ -4,6 +4,29 @@
 Die Änderungen des Originals stehen in `CHANGELOG.md`. Jede Überschrift ist
 ein Release-Tag (siehe `FORK.md`, Abschnitt „Release“).
 
+## 0.3.9-fork.3 - 2026-10-18
+
+- **Entkalkungs-Erinnerung.** Auf der Steam · Water · Flush-Seite gibt es unter
+  der Backflush-Leiste eine Leiste „Descaling“.
+  - Man wählt den Zyklus (Off / 3 / 6 / 12 / 24 Monate, Standard 12) und sieht,
+    wann zuletzt entkalkt wurde und wann es wieder fällig ist.
+  - Das letzte Datum lässt sich nachtragen oder korrigieren.
+  - Ist das Entkalken fällig, wird die Leiste eingefärbt, und der „Water“-Knopf
+    bekommt ein Badge.
+  - Läuft ein Entkalkungszyklus der Maschine fertig durch, merkt Beanie sich das
+    Datum selbst.
+- **Geführtes Entkalken** nach Decents Anleitung, über „Run descale“ oder
+  Einstellungen → Wartung → Descale. Die Schritte:
+  - Steam-Heizung ausschalten und bis 60 °C abkühlen lassen;
+  - Zitronensäure-Lösung ansetzen;
+  - bis zu 3 Entkalkungsdurchgänge;
+  - Heizung wieder an und frisches Wasser;
+  - Brühgruppe spülen;
+  - Steam-Leitung mit 5 × 100 s spülen.
+
+  Steam-Zeit und Heizung stellt der Ablauf am Ende zurück. Schließen pausiert
+  ihn, „Cancel“ bricht ab.
+
 ## 0.3.9-fork.2 - 2026-10-18
 
 - Im Verlauf stehen bei Shots von heute und gestern die Wörter „Heute“ und
