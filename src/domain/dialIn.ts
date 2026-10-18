@@ -3,6 +3,7 @@ import { stripCitationMarkers } from './answerMarkdown';
 import { buildShotStats, shotDurationSeconds } from './shotStats';
 import { computeBeanFreshness } from './beanFreshness';
 import { FIELD_SPECS } from './profileModel';
+import { ENJOYMENT_MAX, enjoymentOnTenScale } from './shotEnjoyment';
 
 // The dial-in helper's pure core: turn a shot + its context into the question
 // Beanie asks Derek (Decent's RAG assistant), and turn Derek's answer back
@@ -151,11 +152,12 @@ function shotDerekTweak(shot: ShotRecord | null): string | null {
   return typeof value === 'string' && value.trim() ? value : null;
 }
 
-// Enjoyment is stored 0-100; de1app imports use 0 for "not rated".
+// Enjoyment is stored 0-10; de1app imports use 0 for "not rated".
 function enjoymentLabel(value: number | null | undefined): string | null {
-  if (typeof value !== 'number' || !Number.isFinite(value) || value <= 0) return null;
-  const label = value <= 20 ? 'bad' : value <= 40 ? 'meh' : value <= 60 ? 'OK' : value <= 80 ? 'good' : 'great';
-  return `${label} (${Math.round(value)}/100)`;
+  const score = enjoymentOnTenScale(value);
+  if (score == null || score <= 0) return null;
+  const label = score <= 2 ? 'bad' : score <= 4 ? 'meh' : score <= 6 ? 'OK' : score <= 8 ? 'good' : 'great';
+  return `${label} (${Number(score.toFixed(1))}/${ENJOYMENT_MAX})`;
 }
 
 function firstStepTemperature(steps: unknown[] | undefined): number | null {

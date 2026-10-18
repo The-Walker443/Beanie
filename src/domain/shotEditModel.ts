@@ -8,6 +8,7 @@ import type {
   WorkflowContext
 } from '../api/types';
 import { shotMetadataWithFreshness } from './liveShotRecord';
+import { enjoymentOnTenScale } from './shotEnjoyment';
 
 export type ShotEditField =
   | 'finalBeverageType'
@@ -152,7 +153,8 @@ export function shotEditDraftFromShot(shot: ShotRecord): ShotEditDraft {
     grinderSetting: textOrNull(inputValue(context.grinderSetting)),
     drinkTds: annotations.drinkTds ?? null,
     drinkEy: annotations.drinkEy ?? null,
-    enjoyment: annotations.enjoyment ?? null,
+    // Saving the draft must not send a legacy 0-100 rating back: the gateway rejects > 10.
+    enjoyment: enjoymentOnTenScale(annotations.enjoyment),
     espressoNotes: annotations.espressoNotes ?? shot.shotNotes ?? null,
     contextExtras: context.extras ?? null,
     annotationExtras: annotations.extras ?? shot.metadata ?? null
